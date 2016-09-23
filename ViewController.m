@@ -7,8 +7,13 @@
 //
 
 #import "ViewController.h"
+#import "Product.h"
 
 @interface ViewController ()<UITableViewDataSource, UITableViewDelegate>
+{
+    //设置为可变数组
+    NSMutableArray *_allProduct;
+}
 
 @end
 
@@ -16,39 +21,47 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+
+    _allProduct = [NSMutableArray array];
+
+    for (int i = 0; i < 20; i++) {
+        NSString *proName = [NSString stringWithFormat:@"产品%d", i+1];
+        NSString *iconName = [NSString stringWithFormat:@"m%d.png", (i%9) + 1];
+        NSString *discri = [NSString stringWithFormat:@"%@产品好", proName];
+
+        Product *item = [Product productWithName:proName icon:iconName productDiscription:discri];
+        [_allProduct addObject:item];
+
+    }
+
+
 }
-#pragma mark 因为采用的是plain格式, 所以只返回1组.
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return 1;
-}
+//若不实现该方法, 则默认为1组.
+//#pragma mark 因为采用的是plain格式, 所以只返回1组.
+//-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+//    return 1;
+//}
 #pragma mark 返回的那一组中, 一共包括多少行. 切记不能与之上的方法记反.
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return 9;
+    //数组中有多少个成员就返回多少行.
+    return [_allProduct count];
 }
 
 #pragma mark  返回cell, 每一行需要具体显示的内容.
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
 
+    //拿到数组中对于行数的那个产品.
+    Product *item = _allProduct[indexPath.row];
 
-    /*
-    系统提供的cell有4种:
-     UITableViewCellStyleDefault,	// Simple cell with text label and optional image view (behavior of UITableViewCell in iPhoneOS 2.x)
-     UITableViewCellStyleValue1,		// Left aligned label on left and right aligned label on right with blue text (Used in Settings)
-     UITableViewCellStyleValue2,		// Right aligned label on left with blue text and left aligned label on right (Used in Phone/Contacts)
-     UITableViewCellStyleSubtitle	// Left aligned label on top and left aligned label on bottom with gray text (Used in iPod).
-     
-     比较常用的为项目中的这种.
-     */
+    //创建cell, 并将其设置为UITableViewCellStyleSubtitle
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
 
-    NSString *imgName = [NSString stringWithFormat:@"m%ld.png", indexPath.row + 1];
-    //以下6行设置cell需要显示的图片, 标签, 以及详细标签.
-    cell.imageView.image = [UIImage imageNamed:imgName];
 
-    cell.textLabel.text = [NSString stringWithFormat:@"第%ld张图片", indexPath.row +1];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"第%d张是好人",
-                                 arc4random_uniform(9) + 1];
+    //以下6行设置cell需要显示的图片, 标签, 以及详细标签.
+    cell.imageView.image = [UIImage imageNamed:item.icon];
+
+    cell.textLabel.text = item.productName;
+    cell.detailTextLabel.text = item.productDiscription;
     //设置详细标签字体颜色
     cell.detailTextLabel.textColor = [UIColor lightGrayColor];
 
