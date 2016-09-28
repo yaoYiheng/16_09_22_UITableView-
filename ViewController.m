@@ -22,6 +22,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    [self loadProdectList];
+
+
+}
+# pragma mark 加载产品列表
+-(NSMutableArray *)loadProdectList{
+
     _allProduct = [NSMutableArray array];
 
     for (int i = 0; i < 20; i++) {
@@ -31,10 +38,10 @@
 
         Product *item = [Product productWithName:proName icon:iconName productDiscription:discri];
         [_allProduct addObject:item];
-
+        
     }
 
-
+    return _allProduct;
 }
 //若不实现该方法, 则默认为1组.
 //#pragma mark 因为采用的是plain格式, 所以只返回1组.
