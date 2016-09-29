@@ -86,8 +86,11 @@
     return 60;
 }
 #pragma mark 选中了某一行的cell就会调用该方法.
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
     NSLog(@"第%ld行被点击了", indexPath.row+1);
+
+    //取出被点击的这行的对象.
     Product *item = _allProduct[indexPath.row];
 
     //preferredStyle中有UIAlertControllerStyleAlert与UIAlertControllerStyleActionSheet
@@ -100,21 +103,10 @@
 
 
 
-    //如果是UIAlertControllerStyleActionSheet 不能使用添加输入框的方法
-
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        //普通按钮
-        NSLog(@"我是普通按钮");
-
-    }];
-
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        //取消按钮
-        NSLog(@"我是取消按钮");
-    }];
     [alertControl addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         //添加输入框(已经自动add，不需要手动)
 
+        //文本输入框中显示图片初始化的名称.
     textField.text = item.productName;
 
 
@@ -123,17 +115,48 @@
 //        textField.secureTextEntry = YES;
 
         //监听
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listeningTextField:) name:UITextFieldTextDidChangeNotification object:textField];
+//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listeningTextField:) name:UITextFieldTextDidChangeNotification object:textField];
+
+    }];
+
+
+    //在该方法中获取用户输入的新名称, 并更改数据模型, 使用[tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:indexPathA,nil] withRowAnimation:UITableViewRowAnimationNone]; 完成局部数据的刷新.
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action)
+    {
+        //获取用户输入的新名称.
+        NSString *newName = alertControl.textFields.firstObject.text;
+
+        // 2.修改模型数据
+        item.productName = newName;
+
+        // 3.告诉tableView重新加载模型数据
+
+        // 全部刷新 [self.tableView reloadData];
+        // reloadData:tableView会向数据源重现请求数据
+        // 重新调用数据源的tableView:numberOfRowsInSection:获得行数
+        // 重新调用数据源的tableView:cellForRowAtIndexPath:得知每一行显示怎样的cell
+
+        // 局部刷新
+        // NSIndexPath *path = [NSIndexPath indexPathForRow:<#(NSInteger)#> inSection:<#(NSInteger)#>];
+
+        //也可以直接 [tableView reloadData] ，但是这样的话肯定会增加内存的负荷
+        //刷新所选中的哪一行.withRowAnimation:中有若干备选动画效果.
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];
+
+
+    }];
+
+    //创建取消按钮.
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
 
     }];
 
 
 
 
-
     //添加按钮（按钮的排列与添加顺序一样，唯独取消按钮会一直在最下面）
     [alertControl addAction:okAction];//ok
-//    [alertControl addAction:aaaAction];//aaa
+
     [alertControl addAction:cancelAction];//cancel
 
 
@@ -142,12 +165,12 @@
 }
 
 //监听弹框上的输入内容的变化
--(void)listeningTextField:(NSNotification *)notionfication
-{
-
-    UITextField *thisTextField = (UITextField*)notionfication.object;
-
-    NSLog(@"%@",thisTextField.text);
-}
+//-(void)listeningTextField:(NSNotification *)notionfication
+//{
+//
+//    UITextField *thisTextField = (UITextField*)notionfication.object;
+//
+//    NSLog(@"%@",thisTextField.text);
+//}
 
 @end
