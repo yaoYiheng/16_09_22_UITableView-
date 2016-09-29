@@ -32,9 +32,9 @@
     _allProduct = [NSMutableArray array];
 
     for (int i = 0; i < 20; i++) {
-        NSString *proName = [NSString stringWithFormat:@"产品%d", i+1];
+        NSString *proName = [NSString stringWithFormat:@"图片%d", i+1];
         NSString *iconName = [NSString stringWithFormat:@"m%d.png", (i%9) + 1];
-        NSString *discri = [NSString stringWithFormat:@"%@产品好", proName];
+        NSString *discri = [NSString stringWithFormat:@"%@好", proName];
 
         Product *item = [Product productWithName:proName icon:iconName productDiscription:discri];
         [_allProduct addObject:item];
@@ -75,12 +75,79 @@
     //设置cell最右边的东东.
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
+
     return cell;
 }
 
 #pragma mark 以上为数据源方法.以下为代理方法
+
 #pragma mark 需要通过代理返回每一行的宽高
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     return 60;
 }
+#pragma mark 选中了某一行的cell就会调用该方法.
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    NSLog(@"第%ld行被点击了", indexPath.row+1);
+    Product *item = _allProduct[indexPath.row];
+
+    //preferredStyle中有UIAlertControllerStyleAlert与UIAlertControllerStyleActionSheet
+    //若想要警告框中能够有输入框, 则使用前者.
+    UIAlertController *alertControl = [UIAlertController
+                                       alertControllerWithTitle:@"图片名称"
+                                                        message:@"输入新名称, 点击确定修改."
+                                                preferredStyle:UIAlertControllerStyleAlert];
+
+
+
+
+    //如果是UIAlertControllerStyleActionSheet 不能使用添加输入框的方法
+
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        //普通按钮
+        NSLog(@"我是普通按钮");
+
+    }];
+
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        //取消按钮
+        NSLog(@"我是取消按钮");
+    }];
+    [alertControl addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        //添加输入框(已经自动add，不需要手动)
+
+    textField.text = item.productName;
+
+
+        //增加占位符跟密码输入
+//        textField.placeholder = @"输入产品名";
+//        textField.secureTextEntry = YES;
+
+        //监听
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listeningTextField:) name:UITextFieldTextDidChangeNotification object:textField];
+
+    }];
+
+
+
+
+
+    //添加按钮（按钮的排列与添加顺序一样，唯独取消按钮会一直在最下面）
+    [alertControl addAction:okAction];//ok
+//    [alertControl addAction:aaaAction];//aaa
+    [alertControl addAction:cancelAction];//cancel
+
+
+    //显示警报框
+    [self presentViewController:alertControl animated:YES completion:nil];
+}
+
+//监听弹框上的输入内容的变化
+-(void)listeningTextField:(NSNotification *)notionfication
+{
+
+    UITextField *thisTextField = (UITextField*)notionfication.object;
+
+    NSLog(@"%@",thisTextField.text);
+}
+
 @end
