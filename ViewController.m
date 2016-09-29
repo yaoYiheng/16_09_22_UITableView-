@@ -60,21 +60,38 @@
     //拿到数组中对于行数的那个产品.
     Product *item = _allProduct[indexPath.row];
 
-    //创建cell, 并将其设置为UITableViewCellStyleSubtitle
-    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
+    //局部变量中使用static关键字, 使创建的局部变量只需分配一次内存, 并且一直存在.
+    static NSString *ID = @"x1";
+
+    //1.从缓存池中取出可以循环利用的cell
+    //tableView自带缓存池, 调用tableView的该方法, 寻找带有相同标识的cell.
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+
+    //2.如果找不到, 则重新创建.
+    if (cell == nil) {
+        //创建cell, 并将其设置为UITableViewCellStyleSubtitle
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:ID];
+    }
 
 
+
+    /*
+     无论是从缓存池中拿到的cell还是新创建的, 都需要在以下代码重新覆盖数据,
+     如果将以下代码写入if中, 则不会出现新数据.
+     */
     //以下6行设置cell需要显示的图片, 标签, 以及详细标签.
     cell.imageView.image = [UIImage imageNamed:item.icon];
-
     cell.textLabel.text = item.productName;
     cell.detailTextLabel.text = item.productDiscription;
+
     //设置详细标签字体颜色
     cell.detailTextLabel.textColor = [UIColor lightGrayColor];
 
     //设置cell最右边的东东.
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
+    //通过打印地址跟对应行数来验证是否达到重新利用cell的目的.
+    //NSLog(@"%p----%ld", cell, indexPath.row);
 
     return cell;
 }
